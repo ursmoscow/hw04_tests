@@ -35,7 +35,7 @@ class PostsURLTest(TestCase):
     def test_urls_status_guest(self):
         """Проверка статуса на странице для гостя"""
         templates_status_chek = {
-            reverse('posts:index'): 200,
+            reverse('posts:index'): HTTPStatus.OK,
             reverse('posts:group_list', kwargs={'slug':
                                                 self.group.slug}):
                                                     HTTPStatus.OK,

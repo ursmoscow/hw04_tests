@@ -31,7 +31,7 @@ class PostCreateFormTests(TestCase):
         self.guest_client = Client()
         self.authorized_client.force_login(self.test_user)
 
-    def test_post(self):
+    def test_create_post(self):
         """Тестирование создания Post"""
         post_count = Post.objects.count()
         form_data = {
@@ -51,31 +51,27 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(self.test_user, new_post.author)
         self.assertEqual(self.group, new_post.group)
 
-        def test_not_create_post_no_authorized_client(self):
-            """Неавторизованный клиент, не может создать
-            пост и переадресовывается на страницу логина"""
-            form_data = {
-                'text': fake.text(),
-                'group': self.group.id,
-            }
-            post_count = Post.objects.count()
-            response = self.client.post(
-                reverse('posts:post_create'),
-                data=form_data,
-                follow=True
-            )
-            login_url = reverse('users:login')
-            create_url = reverse('posts:post_create')
-            self.assertRedirects(response, f'{login_url}?next={create_url}')
-            self.assertEqual(post_count, Post.objects.count())
+    def test_not_create_post_no_authorized_client(self):
+        """Неавторизованный клиент, не может создать
+        пост и переадресовывается на страницу логина"""
+        form_data = {
+            'text': fake.text(),
+            'group': self.group.id,
+        }
+        post_count = Post.objects.count()
+        response = self.client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
+        )
+        login_url = reverse('users:login')
+        create_url = reverse('posts:post_create')
+        self.assertRedirects(response, f'{login_url}?next={create_url}')
+        self.assertEqual(post_count, Post.objects.count())
 
     def test_post_edit_authorized_user(self):
         """Авторизованный пользователь. Редактирование поста."""
-        post = Post.objects.create(
-            text=fake.text(),
-            author=self.test_user,
-            group=self.group,
-        )
+        post = self.post
         form_data = {
             'text': fake.text(),
             'group': self.group.id,
