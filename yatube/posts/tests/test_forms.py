@@ -95,7 +95,7 @@ class PostCreateFormTests(TestCase):
         )
 
     def test_post_edit_by_author(self):
-        edit_url = reverse('post_edit', kwargs={
+        edit_url = reverse('posts:post_edit', kwargs={
             'username': self.test_user.username,
             'post_id': self.post.id})
         response = self.authorized_client.get(edit_url)
