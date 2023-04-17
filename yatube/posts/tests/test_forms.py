@@ -105,7 +105,7 @@ class PostCreateFormTests(TestCase):
                                                {'text': new_text,
                                                 'group': self.group.id})
         self.assertRedirects(response,
-                             reverse('post_detail',
+                             reverse('posts:post_detail',
                                      kwargs={'post_id': self.post.id}))
         self.post.refresh_from_db()
         self.assertEqual(self.post.text, new_text)
