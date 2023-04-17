@@ -98,7 +98,7 @@ class PostCreateFormTests(TestCase):
         edit_url = reverse('posts:post_edit', kwargs={'post_id': self.post.id})
         response = self.authorized_client.get(edit_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Редактирование поста')
+        self.assertContains(response, 'Редактировать запись')
 
         new_text = 'New Test Post'
         response = self.authorized_client.post(edit_url,
