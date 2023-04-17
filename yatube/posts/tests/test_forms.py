@@ -97,8 +97,7 @@ class PostCreateFormTests(TestCase):
     def test_post_edit_by_author(self):
         edit_url = reverse('post_edit', kwargs={
             'username': self.test_user.username,
-            'post_id': self.post.id
-            })
+            'post_id': self.post.id})
         response = self.authorized_client.get(edit_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Редактирование поста')
