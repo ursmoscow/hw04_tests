@@ -104,9 +104,8 @@ class PostCreateFormTests(TestCase):
         response = self.authorized_client.post(edit_url,
                                                {'text': new_text,
                                                 'group': self.group.id})
-        self.assertRedirects(response, reverse(
-            'posts:post_detail',
-            kwargs={'username': self.test_user.username,
-                    'post_id': self.post.id}))
+        self.assertRedirects(response,
+                             reverse('post_detail',
+                                     kwargs={'post_id': self.post.id}))
         self.post.refresh_from_db()
         self.assertEqual(self.post.text, new_text)
