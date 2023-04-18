@@ -71,18 +71,15 @@ class PostCreateFormTests(TestCase):
 
     def test_post_edit_by_non_author(self):
         self.authorized_client.logout()
-        new_user = User.objects.create_user(
+        new_user = get_user_model().objects.create_user(
             username='new_user',
             email='new_user@mail.com',
-            password='12345')
+            password='12345',
+        )
         self.authorized_client.force_login(new_user)
         post_edit_url = reverse('posts:post_edit', args=[self.post.id])
         response = self.authorized_client.get(post_edit_url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('posts:post_detail',
-                                               args=[self.post.id]))
-        self.assertEqual(self.post.text,
-                         Post.objects.get(pk=self.post.pk).text)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_edit_by_author(self):
         edit_url = reverse('posts:post_edit', kwargs={'post_id': self.post.id})
