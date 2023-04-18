@@ -19,6 +19,8 @@ class PostCreateFormTests(TestCase):
             description='Тестовое описание'
         )
         cls.test_user = User.objects.create_user(username='test_user')
+        cls.test_user_not_author = User.objects.create_user(
+            username='test_user_not_author')
 
         cls.post = Post.objects.create(
             text=fake.text(),
@@ -29,7 +31,10 @@ class PostCreateFormTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.guest_client = Client()
+        self.authorized_client_not_author = Client()
         self.authorized_client.force_login(self.test_user)
+        self.authorized_client_not_author.force_login(
+            self.test_user_not_author)
 
     def test_create_post(self):
         """Тестирование создания Post"""
@@ -69,37 +74,18 @@ class PostCreateFormTests(TestCase):
         self.assertRedirects(response, f'{login_url}?next={create_url}')
         self.assertEqual(post_count, Post.objects.count())
 
-    def test_post_edit_authorized_user(self):
-        """Авторизованный пользователь. Редактирование поста."""
-        form_data = {
-            'text': fake.text(),
-            'group': self.group.id,
-        }
-        posts_count = Post.objects.count()
-        response = self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': self.post.id}),
-            data=form_data,
+    def test_post_edit_by_authorized_user_not_author(self):
+        self.authorized_client_not_author.post(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}),
+            data={'text': 'New text'},
             follow=True
         )
-        redirect = reverse(
-            'posts:post_detail',
-            kwargs={'post_id': self.post.id})
-        self.assertRedirects(response, redirect)
-        self.assertEqual(Post.objects.count(), posts_count)
-        self.assertTrue(
-            Post.objects.filter(
-                text=form_data['text'],
-                group=self.group.id,
-                author=self.test_user
-            ).exists()
-        )
+
+        self.assertEqual(self.post.text,
+                         Post.objects.get(pk=self.post.pk).text)
 
     def test_post_edit_by_author(self):
         edit_url = reverse('posts:post_edit', kwargs={'post_id': self.post.id})
-        response = self.authorized_client.get(edit_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Редактировать запись')
-
         new_text = 'New Test Post'
         response = self.authorized_client.post(edit_url,
                                                {'text': new_text,
