@@ -79,7 +79,10 @@ class PostCreateFormTests(TestCase):
         self.authorized_client.force_login(new_user)
         post_edit_url = reverse('posts:post_edit', args=[self.post.id])
         response = self.authorized_client.get(post_edit_url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response,
+                             reverse('posts:post_detail',
+                                     kwargs={'post_id': self.post.id}))
 
     def test_post_edit_by_author(self):
         edit_url = reverse('posts:post_edit', kwargs={'post_id': self.post.id})

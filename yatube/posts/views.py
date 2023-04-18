@@ -1,6 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
 
 from .forms import PostForm
 from .models import Post, Group, User
@@ -68,7 +67,7 @@ def post_create(request):
 def post_edit(request, post_id):
     select_post = get_object_or_404(Post, id=post_id)
     if request.user != select_post.author:
-        return HttpResponseForbidden()
+        return redirect('posts:post_detail', post_id=post_id)
 
     form = PostForm(request.POST or None, instance=select_post)
     if form.is_valid():
