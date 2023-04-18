@@ -19,9 +19,6 @@ class PostCreateFormTests(TestCase):
             description='Тестовое описание'
         )
         cls.test_user = User.objects.create_user(username='test_user')
-        cls.test_user_not_author = User.objects.create_user(
-            username='test_user_not_author')
-
         cls.post = Post.objects.create(
             text=fake.text(),
             author=cls.test_user,
@@ -33,8 +30,6 @@ class PostCreateFormTests(TestCase):
         self.guest_client = Client()
         self.authorized_client_not_author = Client()
         self.authorized_client.force_login(self.test_user)
-        self.authorized_client_not_author.force_login(
-            self.test_user_not_author)
 
     def test_create_post(self):
         """Тестирование создания Post"""
@@ -74,13 +69,18 @@ class PostCreateFormTests(TestCase):
         self.assertRedirects(response, f'{login_url}?next={create_url}')
         self.assertEqual(post_count, Post.objects.count())
 
-    def test_post_edit_by_authorized_user_not_author(self):
-        self.authorized_client_not_author.post(
-            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}),
-            data={'text': 'New text'},
-            follow=True
-        )
-
+    def test_post_edit_by_non_author(self):
+        self.authorized_client.logout()
+        new_user = User.objects.create_user(
+            username='new_user',
+            email='new_user@mail.com',
+            password='12345')
+        self.authorized_client.force_login(new_user)
+        post_edit_url = reverse('posts:post_edit', args=[self.post.id])
+        response = self.authorized_client.get(post_edit_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('posts:post_detail',
+                                               args=[self.post.id]))
         self.assertEqual(self.post.text,
                          Post.objects.get(pk=self.post.pk).text)
 
